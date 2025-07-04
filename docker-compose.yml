@@ -35,6 +35,12 @@ services:
       - "5433:5432" # Expose on a different host port to avoid conflicts
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
 volumes:
   db-data:
   minio_data:

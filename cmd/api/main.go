@@ -9,6 +9,7 @@ import (
 	"github.com/0xpanadol/manga/pkg/uploader"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 
 	// Import the new postgres repository package with an alias
 	postgresrepo "github.com/0xpanadol/manga/internal/repository/postgres"
@@ -54,6 +55,15 @@ func main() {
 	defer dbpool.Close()
 	log.Println("Database connection established")
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: cfg.RedisAddr,
+	})
+	// Ping the redis server to check the connection
+	if _, err := redisClient.Ping(context.Background()).Result(); err != nil {
+		log.Fatalf("could not connect to redis: %v", err)
+	}
+	log.Println("Redis connection established")
+
 	// WIRING
 	userRepo := postgresrepo.NewPostgresUserRepository(dbpool)
 	mangaRepo := postgresrepo.NewPostgresMangaRepository(dbpool)
@@ -81,7 +91,7 @@ func main() {
 		cfg.JWTRefreshExpiresIn,
 	)
 	userService := service.NewUserService(userRepo)
-	mangaService := service.NewMangaService(mangaRepo)
+	mangaService := service.NewMangaService(mangaRepo, redisClient)
 	chapterService := service.NewChapterService(chapterRepo, minioUploader)
 	socialService := service.NewSocialService(socialRepo)
 

@@ -21,6 +21,7 @@ type Config struct {
 	MinioSecretKey      string        `mapstructure:"MINIO_SECRET_KEY"`
 	MinioBucketName     string        `mapstructure:"MINIO_BUCKET_NAME"`
 	MinioUseSSL         bool          `mapstructure:"MINIO_USE_SSL"`
+	RedisAddr           string        `mapstructure:"REDIS_ADDR"`
 }
 
 // LoadConfig reads configuration from file or environment variables.
