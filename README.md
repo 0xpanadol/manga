@@ -1,6 +1,9 @@
 # Go Manga API
 A production-ready HTTP API in Go for a manga reading platform, similar to MangaDex. This backend service is built with a focus on clean architecture, performance, and maintainability.
 
+## 📁 Project Blueprint
+See [docs/blueprint.md](https://github.com/0xpanadol/manga/blob/main/docs/blueprint.md) for folder structure, API design, tech decisions, and more.
+
 ## Features
 
 - **User Authentication**: JWT-based (access/refresh tokens) authentication with secure password hashing (bcrypt).
