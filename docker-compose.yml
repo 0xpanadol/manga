@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: manga-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: manga
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000" # API port
+      - "9001:9001" # Console port
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin # This is your access key
+      MINIO_ROOT_PASSWORD: minioadmin # This is your secret key
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+  test_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: manga_db_test
+    ports:
+      - "5433:5432" # Expose on a different host port to avoid conflicts
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  minio_data:
