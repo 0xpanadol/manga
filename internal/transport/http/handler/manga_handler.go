@@ -99,7 +99,7 @@ func (h *MangaHandler) GetManga(c *gin.Context) {
 type listMangaRequest struct {
 	Page    int    `form:"page,default=1"`
 	PerPage int    `form:"per_page,default=20"`
-	Title   string `form:"title"`
+	Query   string `form:"q"`
 	Genres  string `form:"genres"` // Comma-separated
 	Status  string `form:"status"`
 	Sort    string `form:"sort"` // e.g., "title", "-created_at"
@@ -111,7 +111,7 @@ type listMangaRequest struct {
 // @Produce      json
 // @Param        page      query     int     false  "Page number" default(1)
 // @Param        per_page  query     int     false  "Items per page" default(20)
-// @Param        title     query     string  false  "Filter by title (case-insensitive, partial match)"
+// @Param        q         query     string  false  "Full-text search query for title and description"
 // @Param        genres    query     string  false  "Filter by comma-separated genre names (e.g., Action,Fantasy)"
 // @Param        status    query     string  false  "Filter by status" Enums(ongoing, completed, hiatus, cancelled)
 // @Param        sort      query     string  false  "Sort order (e.g., title, -created_at)"
@@ -127,10 +127,10 @@ func (h *MangaHandler) ListManga(c *gin.Context) {
 	}
 
 	params := repository.ListMangaParams{
-		Limit:  req.PerPage,
-		Offset: (req.Page - 1) * req.PerPage,
-		Title:  req.Title,
-		Status: req.Status,
+		Limit:       req.PerPage,
+		Offset:      (req.Page - 1) * req.PerPage,
+		SearchQuery: req.Query,
+		Status:      req.Status,
 	}
 
 	if req.Genres != "" {

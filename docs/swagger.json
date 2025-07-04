@@ -167,8 +167,8 @@
                     },
                     {
                         "type": "string",
-                        "description": "Filter by title (case-insensitive, partial match)",
-                        "name": "title",
+                        "description": "Full-text search query for title and description",
+                        "name": "q",
                         "in": "query"
                     },
                     {

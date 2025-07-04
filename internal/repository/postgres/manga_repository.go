@@ -103,9 +103,11 @@ func (r *PostgresMangaRepository) List(ctx context.Context, params repository.Li
 	argID := 1
 
 	// Filtering by Title (simple ILIKE search)
-	if params.Title != "" {
-		conditions = append(conditions, fmt.Sprintf("m.title ILIKE $%d", argID))
-		args = append(args, "%"+params.Title+"%")
+	if params.SearchQuery != "" {
+		// We use plainto_tsquery because it's safer for user-provided input.
+		// It automatically handles spaces and basic formatting.
+		conditions = append(conditions, fmt.Sprintf("m.search_tsv @@ plainto_tsquery('english', $%d)", argID))
+		args = append(args, params.SearchQuery)
 		argID++
 	}
 

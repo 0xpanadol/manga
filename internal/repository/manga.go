@@ -14,13 +14,13 @@ var (
 
 // ListMangaParams defines the parameters for listing manga.
 type ListMangaParams struct {
-	Limit     int
-	Offset    int
-	Title     string
-	Genres    []string
-	Status    string
-	SortBy    string // e.g., "title", "created_at"
-	SortOrder string // "asc" or "desc"
+	Limit       int
+	Offset      int
+	SearchQuery string
+	Genres      []string
+	Status      string
+	SortBy      string // e.g., "title", "created_at"
+	SortOrder   string // "asc" or "desc"
 }
 
 type MangaRepository interface {

@@ -218,9 +218,9 @@ paths:
         in: query
         name: per_page
         type: integer
-      - description: Filter by title (case-insensitive, partial match)
+      - description: Full-text search query for title and description
         in: query
-        name: title
+        name: q
         type: string
       - description: Filter by comma-separated genre names (e.g., Action,Fantasy)
         in: query
