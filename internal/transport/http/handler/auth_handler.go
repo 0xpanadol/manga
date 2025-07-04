@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
-	"github.com/0xpanadol/manga/internal/repository"
 	"github.com/0xpanadol/manga/internal/service"
+	"github.com/0xpanadol/manga/pkg/apperrors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -45,17 +44,13 @@ type userResponse struct {
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input", "details": err.Error()})
+		c.Error(err)
 		return
 	}
 
 	user, err := h.authService.Register(c.Request.Context(), req.Username, req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, repository.ErrUserAlreadyExists) {
-			c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to register user"})
+		c.Error(err)
 		return
 	}
 
@@ -90,17 +85,13 @@ type loginResponse struct {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input", "details": err.Error()})
+		c.Error(err)
 		return
 	}
 
 	tokens, err := h.authService.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, repository.ErrUserNotFound) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to login"})
+		c.Error(apperrors.New(http.StatusUnauthorized, "invalid credentials", err))
 		return
 	}
 

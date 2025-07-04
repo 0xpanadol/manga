@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/0xpanadol/manga/internal/domain"
-	"github.com/0xpanadol/manga/internal/repository"
+	"github.com/0xpanadol/manga/pkg/apperrors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -37,10 +37,9 @@ func (r *PostgresUserRepository) Create(ctx context.Context, user *domain.User) 
 	)
 
 	if err != nil {
-		// Check for unique constraint violation
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" { // 23505 is the code for unique_violation
-			return repository.ErrUserAlreadyExists
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return fmt.Errorf("%w: user with this email or username already exists", apperrors.ErrConflict) // Use new error
 		}
 		return fmt.Errorf("failed to create user: %w", err)
 	}
@@ -68,7 +67,7 @@ func (r *PostgresUserRepository) FindByEmail(ctx context.Context, email string) 
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repository.ErrUserNotFound
+			return nil, fmt.Errorf("%w: user not found", apperrors.ErrNotFound) // Use new error
 		}
 		return nil, fmt.Errorf("failed to find user by email: %w", err)
 	}
@@ -113,7 +112,7 @@ func (r *PostgresUserRepository) FindByID(ctx context.Context, id uuid.UUID) (*d
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repository.ErrUserNotFound
+			return nil, fmt.Errorf("%w: user not found", apperrors.ErrNotFound)
 		}
 		return nil, fmt.Errorf("failed to find user by id: %w", err)
 	}
@@ -138,7 +137,7 @@ func (r *PostgresUserRepository) GetRoleAndPermissions(ctx context.Context, user
 	err := r.DB.QueryRow(ctx, query, userID).Scan(&role.ID, &role.Name, &permissions)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repository.ErrUserNotFound // Or a more specific "role not found" error
+			return nil, fmt.Errorf("%w: failed to get role and permissions", apperrors.ErrNotFound)
 		}
 		return nil, fmt.Errorf("failed to get role and permissions: %w", err)
 	}

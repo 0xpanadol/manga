@@ -15,6 +15,7 @@ import (
 	postgresrepo "github.com/0xpanadol/manga/internal/repository/postgres"
 	"github.com/0xpanadol/manga/internal/service"
 	"github.com/0xpanadol/manga/internal/transport/http/handler"
+	"github.com/0xpanadol/manga/internal/transport/http/middleware"
 	"github.com/0xpanadol/manga/internal/transport/http/router"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -103,6 +104,8 @@ func main() {
 
 	// ROUTER
 	ginRouter := gin.Default()
+	ginRouter.Use(middleware.ErrorHandler())
+
 	// Add Swagger route
 	ginRouter.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
