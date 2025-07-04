@@ -17,6 +17,15 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
+// @Summary      Get current user's profile
+// @Description  Retrieves the profile information for the currently authenticated user.
+// @Tags         Users
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  handler.userResponse
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/me [get]
 func (h *UserHandler) GetMe(c *gin.Context) {
 	userID, exists := c.Get(middleware.UserIDKey)
 	if !exists {

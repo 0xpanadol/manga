@@ -19,6 +19,17 @@ func NewSocialHandler(socialService *service.SocialService) *SocialHandler {
 	return &SocialHandler{socialService: socialService}
 }
 
+// @Summary      Toggle manga favorite status
+// @Description  Adds or removes a manga from the current user's favorites list.
+// @Tags         Social
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Manga ID"
+// @Success      200  {object}  repository.ToggleFavoriteResult
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /manga/{id}/favorite [post]
 func (h *SocialHandler) ToggleFavorite(c *gin.Context) {
 	mangaIDStr := c.Param("manga_id")
 	mangaID, err := uuid.Parse(mangaIDStr)
@@ -38,6 +49,17 @@ func (h *SocialHandler) ToggleFavorite(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary      List user's favorite manga
+// @Description  Retrieves a paginated list of the current user's favorite manga.
+// @Tags         Social
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page      query     int     false "Page number" default(1)
+// @Param        per_page  query     int     false "Items per page" default(20)
+// @Success      200       {array}   domain.Manga
+// @Failure      401       {object}  map[string]string
+// @Failure      500       {object}  map[string]string
+// @Router       /users/me/favorites [get]
 func (h *SocialHandler) ListFavorites(c *gin.Context) {
 	userID := c.MustGet(middleware.UserIDKey).(uuid.UUID)
 
@@ -61,6 +83,16 @@ func (h *SocialHandler) ListFavorites(c *gin.Context) {
 	c.JSON(http.StatusOK, mangas)
 }
 
+// @Summary      Mark chapter as read
+// @Description  Marks a chapter as read for the current user.
+// @Tags         Social
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Chapter ID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /chapters/{id}/progress [post]
 func (h *SocialHandler) MarkChapterAsRead(c *gin.Context) {
 	chapterIDStr := c.Param("id")
 	chapterID, err := uuid.Parse(chapterIDStr)
@@ -79,6 +111,15 @@ func (h *SocialHandler) MarkChapterAsRead(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @Summary      List user's read chapters
+// @Description  Retrieves a list of all chapters marked as read by the current user.
+// @Tags         Social
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {array}   domain.Chapter
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /users/me/progress [get]
 func (h *SocialHandler) ListReadChapters(c *gin.Context) {
 	userID := c.MustGet(middleware.UserIDKey).(uuid.UUID)
 
@@ -95,6 +136,19 @@ type createCommentRequest struct {
 	Content string `json:"content" binding:"required,min=1,max=1000"`
 }
 
+// @Summary      Post a comment on a manga
+// @Description  Adds a new comment to a specific manga.
+// @Tags         Social
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path      string  true  "Manga ID"
+// @Param        request body      handler.createCommentRequest true "Comment Content"
+// @Success      201     {object}  domain.Comment
+// @Failure      400     {object}  map[string]string
+// @Failure      401     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /manga/{id}/comments [post]
 func (h *SocialHandler) CreateMangaComment(c *gin.Context) {
 	mangaIDStr := c.Param("manga_id")
 	mangaID, err := uuid.Parse(mangaIDStr)
@@ -125,6 +179,19 @@ func (h *SocialHandler) CreateMangaComment(c *gin.Context) {
 	c.JSON(http.StatusCreated, comment)
 }
 
+// @Summary      Post a comment on a chapter
+// @Description  Adds a new comment to a specific chapter.
+// @Tags         Social
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path      string  true  "Chapter ID"
+// @Param        request body      handler.createCommentRequest true "Comment Content"
+// @Success      201     {object}  domain.Comment
+// @Failure      400     {object}  map[string]string
+// @Failure      401     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /chapters/{id}/comments [post]
 func (h *SocialHandler) CreateChapterComment(c *gin.Context) {
 	chapterIDStr := c.Param("id")
 	chapterID, err := uuid.Parse(chapterIDStr)
@@ -155,6 +222,17 @@ func (h *SocialHandler) CreateChapterComment(c *gin.Context) {
 	c.JSON(http.StatusCreated, comment)
 }
 
+// @Summary      List manga comments
+// @Description  Retrieves a paginated list of comments for a specific manga.
+// @Tags         Social
+// @Produce      json
+// @Param        id        path      string  true  "Manga ID"
+// @Param        page      query     int     false "Page number" default(1)
+// @Param        per_page  query     int     false "Items per page" default(20)
+// @Success      200       {array}   domain.CommentWithUser
+// @Failure      400       {object}  map[string]string
+// @Failure      500       {object}  map[string]string
+// @Router       /manga/{id}/comments [get]
 func (h *SocialHandler) ListMangaComments(c *gin.Context) {
 	mangaIDStr := c.Param("id")
 	mangaID, err := uuid.Parse(mangaIDStr)
@@ -185,6 +263,17 @@ func (h *SocialHandler) ListMangaComments(c *gin.Context) {
 	c.JSON(http.StatusOK, comments)
 }
 
+// @Summary      List chapter comments
+// @Description  Retrieves a paginated list of comments for a specific chapter.
+// @Tags         Social
+// @Produce      json
+// @Param        id        path      string  true  "Chapter ID"
+// @Param        page      query     int     false "Page number" default(1)
+// @Param        per_page  query     int     false "Items per page" default(20)
+// @Success      200       {array}   domain.CommentWithUser
+// @Failure      400       {object}  map[string]string
+// @Failure      500       {object}  map[string]string
+// @Router       /chapters/{id}/comments [get]
 func (h *SocialHandler) ListChapterComments(c *gin.Context) {
 	chapterIDStr := c.Param("id")
 	chapterID, err := uuid.Parse(chapterIDStr)

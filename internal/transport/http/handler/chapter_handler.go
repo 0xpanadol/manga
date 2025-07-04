@@ -26,6 +26,21 @@ type createChapterRequest struct {
 	Pages         []string `json:"pages,omitempty"` // Initially, pages might be empty before upload
 }
 
+// @Summary      Create a new chapter
+// @Description  Adds a new chapter to a specific manga. Requires 'chapters:manage' permission.
+// @Tags         Chapters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        manga_id path      string  true  "Manga ID"
+// @Param        request  body      handler.createChapterRequest true "Chapter Creation Info"
+// @Success      201      {object}  domain.Chapter
+// @Failure      400      {object}  map[string]string
+// @Failure      401      {object}  map[string]string
+// @Failure      403      {object}  map[string]string
+// @Failure      409      {object}  map[string]string
+// @Failure      500      {object}  map[string]string
+// @Router       /manga/{manga_id}/chapters [post]
 func (h *ChapterHandler) CreateChapter(c *gin.Context) {
 	mangaIDStr := c.Param("manga_id")
 	mangaID, err := uuid.Parse(mangaIDStr)
@@ -64,6 +79,16 @@ func (h *ChapterHandler) CreateChapter(c *gin.Context) {
 	c.JSON(http.StatusCreated, chapter)
 }
 
+// @Summary      Get a single chapter by ID
+// @Description  Retrieves details for a single chapter.
+// @Tags         Chapters
+// @Produce      json
+// @Param        id   path      string  true  "Chapter ID"
+// @Success      200  {object}  domain.Chapter
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /chapters/{id} [get]
 func (h *ChapterHandler) GetChapter(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -84,6 +109,17 @@ func (h *ChapterHandler) GetChapter(c *gin.Context) {
 	c.JSON(http.StatusOK, chapter)
 }
 
+// @Summary      List chapters for a manga
+// @Description  Retrieves a paginated list of chapters for a specific manga.
+// @Tags         Chapters
+// @Produce      json
+// @Param        manga_id  path      string  true  "Manga ID"
+// @Param        page      query     int     false "Page number" default(1)
+// @Param        per_page  query     int     false "Items per page" default(20)
+// @Success      200       {array}   domain.Chapter
+// @Failure      400       {object}  map[string]string
+// @Failure      500       {object}  map[string]string
+// @Router       /manga/{manga_id}/chapters [get]
 func (h *ChapterHandler) ListChapters(c *gin.Context) {
 	mangaIDStr := c.Param("id")
 	mangaID, err := uuid.Parse(mangaIDStr)
@@ -112,6 +148,21 @@ func (h *ChapterHandler) ListChapters(c *gin.Context) {
 	c.JSON(http.StatusOK, chapters)
 }
 
+// @Summary      Update a chapter
+// @Description  Updates the details of a specific chapter. Requires 'chapters:manage' permission.
+// @Tags         Chapters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path      string  true  "Chapter ID"
+// @Param        request body      handler.createChapterRequest true "Chapter Update Info"
+// @Success      200     {object}  domain.Chapter
+// @Failure      400     {object}  map[string]string
+// @Failure      401     {object}  map[string]string
+// @Failure      403     {object}  map[string]string
+// @Failure      404     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /chapters/{id} [put]
 func (h *ChapterHandler) UpdateChapter(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -156,6 +207,18 @@ func (h *ChapterHandler) UpdateChapter(c *gin.Context) {
 	c.JSON(http.StatusOK, chapter)
 }
 
+// @Summary      Delete a chapter
+// @Description  Deletes a specific chapter. Requires 'chapters:manage' permission.
+// @Tags         Chapters
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Chapter ID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      401  {object}  map[string]string
+// @Failure      403  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /chapters/{id} [delete]
 func (h *ChapterHandler) DeleteChapter(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -175,6 +238,21 @@ func (h *ChapterHandler) DeleteChapter(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// @Summary      Upload chapter pages
+// @Description  Uploads one or more image files for a chapter. Requires 'chapters:manage' permission.
+// @Tags         Chapters
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path      string  true  "Chapter ID"
+// @Param        pages  formData  file    true  "Image files for the chapter pages. Can be sent multiple times."
+// @Success      200    {object}  map[string]string
+// @Failure      400    {object}  map[string]string
+// @Failure      401    {object}  map[string]string
+// @Failure      403    {object}  map[string]string
+// @Failure      404    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Router       /chapters/{id}/pages [post]
 func (h *ChapterHandler) UploadPages(c *gin.Context) {
 	chapterIDStr := c.Param("id")
 	chapterID, err := uuid.Parse(chapterIDStr)
