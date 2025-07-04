@@ -6,10 +6,13 @@ import (
 	"net/http"
 
 	"github.com/0xpanadol/manga/internal/config"
+	"github.com/0xpanadol/manga/pkg/logger"
 	"github.com/0xpanadol/manga/pkg/uploader"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 
 	// Import the new postgres repository package with an alias
 	postgresrepo "github.com/0xpanadol/manga/internal/repository/postgres"
@@ -48,6 +51,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not load config: %v", err)
 	}
+
+	// === INITIALIZE LOGGER ===
+	appLogger := logger.New(cfg.AppEnv)
+	defer appLogger.Sync() // Flushes buffer, if any
+	appLogger.Info("Application configuration loaded")
 
 	dbpool, err := pgxpool.New(context.Background(), cfg.DBUrl)
 	if err != nil {
@@ -104,9 +112,14 @@ func main() {
 
 	// ROUTER
 	ginRouter := gin.Default()
+	ginRouter.Use(middleware.MetricsMiddleware()) // Metrics should be early
+	ginRouter.Use(middleware.LoggerMiddleware(appLogger))
 	ginRouter.Use(middleware.CorsMiddleware(cfg.CorsAllowedOrigins))
 	ginRouter.Use(middleware.SecurityHeadersMiddleware())
 	ginRouter.Use(middleware.ErrorHandler())
+
+	// === ADD NEW SYSTEM ENDPOINTS ===
+	ginRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Add Swagger route
 	ginRouter.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -126,8 +139,8 @@ func main() {
 	)
 
 	// SERVER
-	log.Printf("Server starting on port %s", cfg.AppPort)
+	appLogger.Info("Server starting", zap.String("port", cfg.AppPort))
 	if err := ginRouter.Run(":" + cfg.AppPort); err != nil {
-		log.Fatalf("failed to run server: %v", err)
+		appLogger.Fatal("failed to run server", zap.Error(err))
 	}
 }

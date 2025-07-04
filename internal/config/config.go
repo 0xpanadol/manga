@@ -11,6 +11,7 @@ import (
 // Config stores all configuration of the application.
 // The values are read by viper from a config file or environment variable.
 type Config struct {
+	AppEnv              string        `mapstructure:"APP_ENV" validate:"oneof=development production"`
 	AppPort             string        `mapstructure:"APP_PORT"`
 	DBUrl               string        `mapstructure:"DB_URL"`
 	TestDBUrl           string        `mapstructure:"TEST_DB_URL" validate:"required"`
