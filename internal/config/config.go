@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
 
@@ -12,6 +13,7 @@ import (
 type Config struct {
 	AppPort             string        `mapstructure:"APP_PORT"`
 	DBUrl               string        `mapstructure:"DB_URL"`
+	TestDBUrl           string        `mapstructure:"TEST_DB_URL" validate:"required"`
 	JWTAccessSecret     string        `mapstructure:"JWT_ACCESS_SECRET"`
 	JWTRefreshSecret    string        `mapstructure:"JWT_REFRESH_SECRET"`
 	JWTAccessExpiresIn  time.Duration `mapstructure:"JWT_ACCESS_EXPIRES_IN"`
@@ -22,6 +24,7 @@ type Config struct {
 	MinioBucketName     string        `mapstructure:"MINIO_BUCKET_NAME"`
 	MinioUseSSL         bool          `mapstructure:"MINIO_USE_SSL"`
 	RedisAddr           string        `mapstructure:"REDIS_ADDR"`
+	CorsAllowedOrigins  []string      `mapstructure:"CORS_ALLOWED_ORIGINS"`
 }
 
 // LoadConfig reads configuration from file or environment variables.
@@ -40,8 +43,6 @@ func LoadConfig() (config Config, err error) {
 
 	err = viper.ReadInConfig()
 	if err != nil {
-		// If the config file is not found, it's not a fatal error.
-		// We can rely on environment variables.
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			log.Printf("Error reading config file: %s", err)
 			return
@@ -51,6 +52,13 @@ func LoadConfig() (config Config, err error) {
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		log.Printf("Unable to decode into struct: %v", err)
+		return
+	}
+
+	validate := validator.New()
+	if err = validate.Struct(&config); err != nil {
+		log.Printf("Missing required configuration: %v", err)
+		return
 	}
 
 	return

@@ -104,6 +104,8 @@ func main() {
 
 	// ROUTER
 	ginRouter := gin.Default()
+	ginRouter.Use(middleware.CorsMiddleware(cfg.CorsAllowedOrigins))
+	ginRouter.Use(middleware.SecurityHeadersMiddleware())
 	ginRouter.Use(middleware.ErrorHandler())
 
 	// Add Swagger route
