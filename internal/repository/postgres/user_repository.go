@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/0xpanadol/manga/internal/domain"
 	"github.com/0xpanadol/manga/pkg/apperrors"
@@ -144,4 +145,13 @@ func (r *PostgresUserRepository) GetRoleAndPermissions(ctx context.Context, user
 	role.Permissions = permissions
 
 	return &role, nil
+}
+
+func (r *PostgresUserRepository) CreatePasswordResetToken(ctx context.Context, userID uuid.UUID, tokenHash []byte, expiresAt time.Time) error {
+	query := `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`
+	_, err := r.DB.Exec(ctx, query, userID, tokenHash, expiresAt)
+	if err != nil {
+		return fmt.Errorf("failed to create password reset token: %w", err)
+	}
+	return nil
 }

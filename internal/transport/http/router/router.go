@@ -21,6 +21,8 @@ func Setup(
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+			auth.POST("/request-password-reset", authHandler.RequestPasswordReset)
+
 		}
 
 		// Protected routes

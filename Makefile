@@ -5,6 +5,10 @@ include .env
 run:
 	go run ./cmd/api
 
+# Run the worker locally
+run-worker:
+	go run ./cmd/worker
+
 # Build the Go binary
 build:
 	go build -o bin/manga-api ./cmd/api

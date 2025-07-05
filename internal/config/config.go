@@ -26,6 +26,12 @@ type Config struct {
 	MinioUseSSL         bool          `mapstructure:"MINIO_USE_SSL"`
 	RedisAddr           string        `mapstructure:"REDIS_ADDR"`
 	CorsAllowedOrigins  []string      `mapstructure:"CORS_ALLOWED_ORIGINS"`
+	RabbitMQUrl         string        `mapstructure:"RABBITMQ_URL" validate:"required"`
+	SmtpHost            string        `mapstructure:"SMTP_HOST" validate:"required"`
+	SmtpPort            int           `mapstructure:"SMTP_PORT" validate:"required"`
+	SmtpUsername        string        `mapstructure:"SMTP_USERNAME"`
+	SmtpPassword        string        `mapstructure:"SMTP_PASSWORD"`
+	SmtpSender          string        `mapstructure:"SMTP_SENDER" validate:"required,email"`
 }
 
 // LoadConfig reads configuration from file or environment variables.

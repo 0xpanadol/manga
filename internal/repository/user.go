@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/0xpanadol/manga/internal/domain"
 	"github.com/google/uuid"
@@ -19,4 +20,5 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
 	FindDefaultUserRoleID(ctx context.Context) (uuid.UUID, error)
 	GetRoleAndPermissions(ctx context.Context, userID uuid.UUID) (*domain.Role, error)
+	CreatePasswordResetToken(ctx context.Context, userID uuid.UUID, tokenHash []byte, expiresAt time.Time) error
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/0xpanadol/manga/internal/config"
+	"github.com/0xpanadol/manga/pkg/broker"
 	"github.com/0xpanadol/manga/pkg/logger"
 	"github.com/0xpanadol/manga/pkg/uploader"
 	"github.com/gin-gonic/gin"
@@ -73,6 +74,14 @@ func main() {
 	}
 	log.Println("Redis connection established")
 
+	// === INITIALIZE BROKER ===
+	messageBroker, err := broker.NewRabbitMQBroker(cfg.RabbitMQUrl)
+	if err != nil {
+		appLogger.Fatal("Could not initialize message broker", zap.Error(err))
+	}
+	defer messageBroker.Close()
+	appLogger.Info("Message broker connected")
+
 	// WIRING
 	userRepo := postgresrepo.NewPostgresUserRepository(dbpool)
 	mangaRepo := postgresrepo.NewPostgresMangaRepository(dbpool)
@@ -94,6 +103,7 @@ func main() {
 
 	authService := service.NewAuthService(
 		userRepo,
+		messageBroker,
 		cfg.JWTAccessSecret,
 		cfg.JWTRefreshSecret,
 		cfg.JWTAccessExpiresIn,

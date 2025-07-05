@@ -100,3 +100,23 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		RefreshToken: tokens.RefreshToken,
 	})
 }
+
+type requestPasswordResetRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
+	var req requestPasswordResetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(err)
+		return
+	}
+
+	if err := h.authService.RequestPasswordReset(c.Request.Context(), req.Email); err != nil {
+		c.Error(err)
+		return
+	}
+
+	// Always return a success response to prevent email enumeration attacks.
+	c.JSON(http.StatusOK, gin.H{"message": "If an account with that email exists, a password reset link has been sent."})
+}
